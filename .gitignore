@@ -5,6 +5,7 @@ dependency-reduced-pom.xml
 log/
 target/
 .vscode/
+.sts4-cache/
 # Compiled class file
 *.class
 

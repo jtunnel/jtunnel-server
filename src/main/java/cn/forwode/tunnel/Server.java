@@ -12,12 +12,13 @@ public class Server {
         logger.info("start server...............");
         ServerSocket server = new ServerSocket(20006);  
         Socket clientSocket = null;  
+        IServerSocketHandler handler = new ServerSocketHandler();
         boolean f = true;  
         while(f){  
             clientSocket = server.accept();  
             clientSocket.setSoTimeout(3000);
             logger.info("连接成功: " + clientSocket.getRemoteSocketAddress().toString());  
-            (new ServerThread(clientSocket)).start();  
+            (new ServerThread(clientSocket, handler)).start();  
         }  
         server.close();  
     }  

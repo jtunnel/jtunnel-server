@@ -3,8 +3,6 @@ package cn.forwode.tunnel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
@@ -14,17 +12,18 @@ import org.slf4j.LoggerFactory;
 public class ServerThread extends Thread {
     
     final Logger logger = LoggerFactory.getLogger(getClass());
-    private Socket clientSocket = null;
+    private Socket clientSocket;
+    private IServerSocketHandler handler;
 
-    public ServerThread(Socket clientSocket) {
+    public ServerThread(Socket clientSocket, IServerSocketHandler handler) {
         super("ServerThread");
         this.clientSocket = clientSocket;
+        this.handler = handler;
     }
 
     public void run() {
 
         try {
-            PrintStream controlPrintStream = new PrintStream(clientSocket.getOutputStream());
             BufferedReader clientInputBuf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             boolean flag = true;
             while (flag) {
@@ -33,28 +32,25 @@ public class ServerThread extends Thread {
                     clientStr = clientInputBuf.readLine();
                 } catch (SocketTimeoutException e) {
                 }
+
+                if (clientStr.startsWith("CTRL=")) {
+                    
+                    String pid = clientStr.split("=")[1].split("@")[0];
+                    String machineName = clientStr.split("=")[1].split("@")[1];
+                    String ip = clientSocket.getInetAddress().toString();
+                    Client client = new Client(pid, machineName, ip);
+                    handler.onRequestControl(clientSocket, client);
+                    flag = false;
+                }
                 
                 if (clientStr.startsWith("R=")) {
-                    ServerSocket serverSocket = null;
-                    String port = clientStr.split("=")[1];
-                    try {
-                        serverSocket = new ServerSocket(Integer.parseInt(port));
-                        controlPrintStream.println("200");
-                        ServerClientSocketPool.getServerClientSocket(port).setServerSocket(serverSocket);
-                        ServerClientSocketPool.getServerClientSocket(port).setControlSocket(clientSocket);
-                        Thread controlThread = new ControlThread(port, clientSocket);
-                        // ControlThreadManager.addControlThread(port, controlThread);
-                        controlThread.start();
-                        new PortServerThread(port).start();
-                        // server.setSoTimeout(3000);
-                    } catch (NumberFormatException e2) {
-                        logger.error("NumberFormatException", e2);
-                        controlPrintStream.println("400");
-                    } catch (IOException e2) {
-                        logger.error("new data socket, port has bind......." + port);
-                        ClientDataSocket clientDataSocket = new ClientDataSocket(clientSocket);
-                        ServerClientSocketPool.getServerClientSocket(port).getClientDataSockets().add(clientDataSocket);
-                    }
+                    String port = clientStr.split("=")[2];
+                    String pid = clientStr.split("=")[1].split("@")[0];
+                    String machineName = clientStr.split("=")[1].split("@")[1];
+                    String ip = clientSocket.getInetAddress().toString();
+                    String id = String.format("%s@%s@%s", pid, machineName, ip);
+                    Client client = ClientManager.getInstance().getClientById(id);
+                    handler.onRequestRemoteForward(clientSocket, client, port);
                     flag = false;
                 }
 

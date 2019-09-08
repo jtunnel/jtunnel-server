@@ -14,11 +14,13 @@ public class WriteToUserThread extends Thread {
     final Logger logger = LoggerFactory.getLogger(getClass());
     private Socket userSocket;
     private ClientDataSocket clientDataSocket;
+    private Client client;
 
-    public WriteToUserThread(Socket userSocket, ClientDataSocket clientDataSocket) {
+    public WriteToUserThread(Socket userSocket, ClientDataSocket clientDataSocket, Client client) {
         super("WriteToUserThread");
         this.userSocket = userSocket;
         this.clientDataSocket = clientDataSocket;
+        this.client = client;
     }
 
     public void run() {
@@ -45,7 +47,7 @@ public class WriteToUserThread extends Thread {
             logger.error("WriteToUser error", e);
         } finally {
             logger.error("socket closed, end WriteToUserThread.....");
-            ServerClientSocketPool.deleteDataSocket(Integer.toString(userSocket.getLocalPort()), clientDataSocket);
+            client.deletePortDataSocket(Integer.toString(userSocket.getLocalPort()), clientDataSocket);
             try {
                 clientSocket.close();
                 userSocket.close();

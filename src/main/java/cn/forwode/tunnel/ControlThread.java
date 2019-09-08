@@ -20,12 +20,12 @@ import org.slf4j.LoggerFactory;
 public class ControlThread extends Thread {
     
     final Logger logger = LoggerFactory.getLogger(getClass());
-    private String port;
+    private Client client;
     private Socket clientSocket;
 
-    public ControlThread(String port, Socket clientSocket) {
-        super("ControlThread-"+port);
-        this.port = port;
+    public ControlThread(Client client, Socket clientSocket) {
+        super("ControlThread-" + client.getId());
+        this.client = client;
         this.clientSocket = clientSocket;
 	}
 
@@ -46,6 +46,7 @@ public class ControlThread extends Thread {
             BufferedReader clientInputBuf = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             boolean flag = true;
             while (flag) {
+                Thread.sleep(3000);
                 controlPrintStream.println("ping");
                 String clientStr = "";
                 try {
@@ -53,14 +54,13 @@ public class ControlThread extends Thread {
                 } catch (SocketTimeoutException e) {
                     flag = false;
                 }
-                Thread.sleep(3000);
             }
         } catch (IOException e) {
             logger.error("IOException...", e);
         } catch (InterruptedException e) {
             logger.error("Interrupted...", e);
         } finally {
-            ServerClientSocketPool.clearSockets(port);
+            ClientManager.getInstance().remove(client);
             logger.warn("End Control Thread...");
         }
     }

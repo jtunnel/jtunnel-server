@@ -6,8 +6,8 @@ import java.net.Socket;
 
 public class ClientControlUtil {
 
-    public static void sendMsg(String port, String msg) throws IOException{
-        Socket controlSocket = ServerClientSocketPool.getServerClientSocket(port).getControlSocket();
+    public static void sendMsg(Client client, String msg) throws IOException{
+        Socket controlSocket = client.getControlSocket();
         PrintStream controlPrintStream = new PrintStream(controlSocket.getOutputStream());
         controlPrintStream.println(msg);
     }

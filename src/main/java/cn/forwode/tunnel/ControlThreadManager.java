@@ -7,11 +7,11 @@ public class ControlThreadManager{
 
     private static Map<String, Thread> threadsMap = new HashMap<String, Thread>();
 
-    public static Thread getControlThread(String port){
-        return threadsMap.get(port);
+    public static Thread getControlThread(String id){
+        return threadsMap.get(id);
     }
 
-    public static void addControlThread(String port, Thread controlThread){
-        threadsMap.put(port, controlThread);
+    public static void addControlThread(String id, Thread controlThread){
+        threadsMap.put(id, controlThread);
     }
 }

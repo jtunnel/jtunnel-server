@@ -14,11 +14,13 @@ public class ReadFromUserThread extends Thread {
     final Logger logger = LoggerFactory.getLogger(getClass());
     private Socket userSocket;
     private ClientDataSocket clientDataSocket;
+    private Client client;
 
-    public ReadFromUserThread(Socket userSocket, ClientDataSocket clientDataSocket) {
+    public ReadFromUserThread(Socket userSocket, ClientDataSocket clientDataSocket, Client client) {
         super("ReadFromUserThread");
         this.userSocket = userSocket;
         this.clientDataSocket = clientDataSocket;
+        this.client = client;
     }
 
     public void run() {
@@ -45,7 +47,7 @@ public class ReadFromUserThread extends Thread {
             logger.error("ReadFromUser error", e);
         } finally {
             logger.error("socket closed, end ReadFromUserThread.....");
-            ServerClientSocketPool.deleteDataSocket(Integer.toString(userSocket.getLocalPort()), clientDataSocket);
+            client.deletePortDataSocket(Integer.toString(userSocket.getLocalPort()), clientDataSocket);
             try {
                 clientSocket.close();
                 userSocket.close();
