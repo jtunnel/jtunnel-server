@@ -28,7 +28,7 @@ public class PortServerThread extends Thread {
             while(!server.isClosed()) {
                 try {
                     userSocket = server.accept();
-                    ClientControlUtil.sendMsg(client, "NEW="+port);
+                    client.sendMsg("NEW="+port);
                     logger.info("用户连接成功: "+userSocket.getRemoteSocketAddress().toString());
                     userSocket.setSoTimeout(3000);
                     ClientDataSocket unUsedclientDataSocket = client.getUnusedClientDataSocket(port);

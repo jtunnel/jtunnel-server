@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.PrintStream;
 
 public class Client {
 
@@ -118,6 +119,9 @@ public class Client {
         this.portSocketMap = portSocketMap;
     }
 
-
+    public void sendMsg(String msg) throws IOException{
+        PrintStream controlPrintStream = new PrintStream(controlSocket.getOutputStream());
+        controlPrintStream.println(msg);
+    }
 
 }
